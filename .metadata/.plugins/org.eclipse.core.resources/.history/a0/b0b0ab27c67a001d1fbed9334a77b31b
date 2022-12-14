@@ -1,0 +1,43 @@
+package tw.Intumit.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tw.Intumit.model.House;
+
+@Controller
+public class JsonCreatorController {
+	
+	//第一種
+	@GetMapping("/jsoncreator.controller")
+	@ResponseBody
+	public String processAction() throws JsonProcessingException {
+		House h1 = new House();
+		h1.setHouseid(1000);
+		h1.setHousename("Happy House");
+		
+		//Bean物件轉成json字串
+		ObjectMapper om = new ObjectMapper();
+		String hJson = om.writeValueAsString(h1);
+		
+		//json轉乘Bean物件
+		House h2 = om.readValue(hJson, House.class);
+		System.out.println(h2.getHouseid() + " " + h2.getHousename());
+		
+		return hJson;
+	}
+	
+	//第二種(常用)
+	@GetMapping("/jsoncreator2.controller")
+	@ResponseBody //回傳是application/json
+	public House processAction2() throws JsonProcessingException {
+		House h1 = new House();
+		h1.setHouseid(1000);
+		h1.setHousename("Happy House");		
+		return h1;
+	}
+}

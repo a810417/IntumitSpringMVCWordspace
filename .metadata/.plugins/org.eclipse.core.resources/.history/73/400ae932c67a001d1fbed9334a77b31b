@@ -1,0 +1,185 @@
+package tw.Intumit.model;
+
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+@Repository
+@Transactional
+public class MallmembersDao {
+	
+	@Autowired
+	private SessionFactory sessionFactory;
+
+    public boolean checkLogin(MallMembers mallMembers) {
+		Session session = sessionFactory.openSession();
+		
+		String hqlstr = "from MallMembers where username=:user and password=:pwd";
+		Query<MallMembers> query = session.createQuery(hqlstr,MallMembers.class);
+		query.setParameter("user", mallMembers.getUsername()).setParameter("pwd", mallMembers.getPassword());
+		
+		MallMembers myMallMembers = query.uniqueResult();//如果沒有會回傳null，有多筆資料時會丟出NonUniqueResultException
+		//Account myAccount = query.getSingleResult();//如果沒有會丟出NoResultException，有多筆資料時會丟出NonUniqueResultException
+		
+		session.close();
+		
+	   if(myMallMembers!=null) {
+		   return true;
+	   }
+		return false;
+	}
+    
+    public BankAccount checkLogin2(BankAccount bankAccount) {
+  		Session session = sessionFactory.openSession();
+  		
+  		String hqlstr = "from BankAccount where bank_code=:bank_code and account_no=:account_no";
+  		Query<BankAccount> query = session.createQuery(hqlstr,BankAccount.class);
+  		query.setParameter("bank_code", bankAccount.getBank_code()).setParameter("account_no", bankAccount.getAccount_no());
+  		
+  		BankAccount myBankAccount = query.uniqueResult();//如果沒有會回傳null，有多筆資料時會丟出NonUniqueResultException
+  		//Account myAccount = query.getSingleResult();//如果沒有會丟出NoResultException，有多筆資料時會丟出NonUniqueResultException
+  		
+  		
+  	   if(myBankAccount!=null) {
+  		   session.close();
+  		   return myBankAccount;
+  	   }
+  	    session.close();
+  		return null;
+  	}
+    
+    public int checkLogin3(MallMembers mallMembers) {
+    	Session session = sessionFactory.openSession();
+    	MallMembers mMember = session.get(MallMembers.class, mallMembers.getId());
+    	int fkId = mMember.getBankAccount().getId();
+    	session.close();
+    	return fkId;
+    }
+    
+    public MallMembers getBean(MallMembers mallMembers) {
+    	Session session = sessionFactory.openSession();
+    	String hqlstr = "from MallMembers where username=:user and password=:pwd";
+		Query<MallMembers> query = session.createQuery(hqlstr,MallMembers.class);
+		query.setParameter("user", mallMembers.getUsername()).setParameter("pwd", mallMembers.getPassword());
+		
+		MallMembers myMallMembers = query.uniqueResult();
+    	session.close();
+    	if(myMallMembers!=null) {
+    		return myMallMembers;
+    	}
+    	return null;
+    }
+    
+    
+    public MallMembers insert(MallMembers mallMembers) {
+    	Session session = sessionFactory.openSession();
+    		session.save(mallMembers);
+    		session.close();
+    		return mallMembers;
+    }
+    
+    public List<MallMembers> selectAllMallMembers(){
+    	Session session = sessionFactory.openSession();
+    	String hqlstr = "from MallMembers";
+    	Query<MallMembers> query = session.createQuery(hqlstr,MallMembers.class);
+    	List<MallMembers> list = query.list();
+    	session.close();
+    	return list;
+    }
+    
+    public List<BankAccount> selectAllBankAccount(){
+    	Session session = sessionFactory.openSession();
+    	String hqlstr = "from BankAccount";
+    	Query<BankAccount> query = session.createQuery(hqlstr,BankAccount.class);
+    	List<BankAccount> list = query.list();
+    	session.close();
+    	return list;
+    }
+    
+    public MallMembers selectOne(int id) {
+    	Session session = sessionFactory.openSession();
+    	String hqlstr = "from MallMembers where id=:id ";
+    	Query<MallMembers> query = session.createQuery(hqlstr,MallMembers.class);
+    	query.setParameter("id", id);
+    	MallMembers myMallMembers = query.getSingleResult();
+    	session.close();
+    	if(myMallMembers!=null) {
+    		return myMallMembers;
+    	}else {
+    		System.out.println("查詢失敗");
+    		return null;
+    	}
+    }
+    
+    public MallMembers update(MallMembers mallMembers) {
+    	Session session = sessionFactory.openSession();
+    	session.beginTransaction();
+    	MallMembers mMember = session.get(MallMembers.class, mallMembers.getId());	
+    	if(mMember!=null) {
+    		mMember.setUsername(mallMembers.getUsername());
+    		mMember.setPassword(mallMembers.getPassword());
+    		mMember.setBirth(mallMembers.getBirth());
+    		mMember.setPhone(mallMembers.getPhone());
+    		mMember.setEmail(mallMembers.getEmail());
+    		Date date = new Date();
+    		mMember.setUpdate_date(date);
+    		session.getTransaction().commit();
+    		session.close();
+    		return mMember;
+    	}else {
+    		System.out.println("更新失敗");
+    		session.getTransaction().rollback();
+    		session.close();
+    		return null;
+    	}
+    }
+    
+    public boolean delete(int id) {
+    	Session session = sessionFactory.openSession();
+    	session.beginTransaction();
+    	MallMembers mMember = session.get(MallMembers.class, id);
+    	if(mMember!=null) {
+    		session.delete(mMember);
+    		session.getTransaction().commit();
+    		session.close();
+    		return true;
+    	}else {
+    	System.out.println("刪除失敗");
+    	session.getTransaction().rollback();
+    	session.close();
+    	return false;
+    	}
+    }
+    
+    public List<MallMembers> like(String search){
+    	Session session = sessionFactory.openSession();
+    	String hql = "from MallMembers where username like :user or phone like :phone or convert(nvarchar,birth,23) like :birth";
+    	
+
+    	Query<MallMembers> query = session.createQuery(hql,MallMembers.class);
+
+    	query.setParameter("user", "%"+search+"%").setParameter("phone", "%"+search+"%").setParameter("birth", "%"+search+"%");
+
+    	List<MallMembers> list = query.list();
+ 
+    	session.close();
+  
+    	if(!list.isEmpty()) {
+    		return list;
+    	}
+    	System.out.println("空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空空");
+    	return null;	
+    }
+}
+

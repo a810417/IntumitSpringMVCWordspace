@@ -1,0 +1,19 @@
+package tw.Intumit.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import tw.Intumit.dao.MessageDao;
+import tw.Intumit.model.Message;
+
+@Service
+public class MessageService {
+
+	@Autowired
+	private MessageDao mDao;
+
+	public Message insert(Message message) {
+		return mDao.insert(message);
+	}
+
+}

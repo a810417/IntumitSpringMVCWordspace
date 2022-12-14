@@ -1,0 +1,36 @@
+package tw.Intumit.controller;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.IOUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class ResponseController {
+	
+	@GetMapping(path = "/response1.controller" ,produces = "text/plain;charset=UTF-8")//produces是回傳給client端，consumes 是接收client端
+	@ResponseBody//回傳是json (appliction/json)
+	public String processResponseAction() {
+		return "Hellow , how are you! 你好";
+	}
+	
+	@GetMapping(value="/responseentity.action")
+	public ResponseEntity<String> processResponseEntityAction(){
+		return new ResponseEntity<String>("Custom status code",HttpStatus.FORBIDDEN);//前面是要顯示內容，後面是禁止進入網頁
+	}
+	
+	@GetMapping(path = "/imagesstream.controller", produces = "text/plain;charset=UTF-8")
+	@ResponseBody
+	public byte[] processResponseImageAsStreamAction(HttpServletRequest request,HttpServletResponse response) throws IOException{
+		InputStream in = request.getServletContext().getResourceAsStream("/WEB-INF/resources/images/images01.gif");
+		return IOUtils.toByteArray(in);
+	}
+}

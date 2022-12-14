@@ -1,0 +1,61 @@
+package tw.Intumit.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
+
+@Controller//不使用servlet物件
+@SessionAttributes(names={"userName"})
+public class HelloController2 {
+
+	//@RequestMapping(path="/hello2main.controller",method = RequestMethod.GET)
+	@GetMapping(path="/hello2main.controller")
+	public String processMainAction() {
+		return "form";
+	}
+	
+	//@RequestMapping(path = "/hello2.controller", method = RequestMethod.GET)//第一種寫法，form action路徑設定/hello2.controller並且method為get時會用到此方法
+	@GetMapping(path = "/hello2.controller")//第二種寫法
+	public String processAction(@RequestParam("userName") String userName, Model m,SessionStatus status) {//String userName = request.getParameter("userName");
+		Map<String, String> errors = new HashMap<String, String>();
+		m.addAttribute("errors", errors);//request.setAttribute("errors", errors); request用m代替
+		if (userName == null || userName.length() == 0) {
+			errors.put("name", "name is repuired");
+		}
+
+		if (errors != null && !errors.isEmpty()) {
+			return "form"; //之前是回傳ModelAndView現在是回傳String兩種都可以
+		}
+		status.setComplete();//如果想刪除其他之前session值，在@SessionAttributes的name多加該session名稱
+		
+		m.addAttribute("userName", userName);//session.setAttribute("userName", userName);; session用m代替
+		return "success"; //之前是回傳ModelAndView現在是回傳String兩種都可以
+	}
+	
+	//@RequestMapping(path = "/hello2.controller", method = RequestMethod.POST)//form action路徑設定/hello2.controller並且method為post時會用到此方法
+	@PostMapping(path = "/hello2.controller")
+	public String processAction2(@RequestParam("userName") String userName, Model m,SessionStatus status) {//String userName = request.getParameter("userName");
+		Map<String, String> errors = new HashMap<String, String>();
+		m.addAttribute("errors", errors);//request.setAttribute("errors", errors); request用m代替
+		if (userName == null || userName.length() == 0) {
+			errors.put("name", "name is repuired");
+		}
+
+		if (errors != null && !errors.isEmpty()) {
+			return "form"; //之前是回傳ModelAndView現在是回傳String兩種都可以
+		}
+		status.setComplete();//刪除當頁的所有session，如果想刪除其他之前session值，在@SessionAttributes的name多加該session名稱
+		
+		m.addAttribute("userName", userName);//session.setAttribute("userName", userName);; session用m代替
+		return "success"; //之前是回傳ModelAndView現在是回傳String兩種都可以
+	}
+}

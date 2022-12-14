@@ -1,0 +1,221 @@
+package tw.Intumit.controller;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.support.SessionStatus;
+
+import tw.Intumit.model.BankAccount;
+import tw.Intumit.model.MallMembers;
+import tw.Intumit.model.MallmembersService;
+
+@Controller
+@SessionAttributes(names={"sessionBean"})
+public class MallMembersController {
+	
+	@Autowired
+	private MallmembersService mService;
+	
+	@GetMapping(path="/testchecklogin.controller")
+	public String processMainAction() {
+		return "testloginSystem";
+	}
+	
+	@GetMapping(path="/testregister")
+	public String processMainAction2(Model m) {
+		return "testregister";
+	}
+	
+	@PostMapping(path="/testcheckregister")
+	//@DateTimeFormat(pattern = "yyyy-MM-dd")Date birth 放在@RequestParam後面
+	public String processMainAction3(@RequestParam("userName")String userName,@RequestParam("password")String password,
+			@RequestParam("birth")String birth,@RequestParam("phone")String phone,@RequestParam("email")String email,
+			@RequestParam(value="account_no" ,defaultValue = "0")Integer account_no,@RequestParam(value="bank_code",defaultValue = "0")Integer bank_code, Model m) throws ParseException {
+		List<MallMembers> mallMembersList = mService.selectAllMallMembers();
+		Map<String, String> errors = new HashMap<String, String>();
+		m.addAttribute("errors", errors);
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");//日期驗證
+		
+		if(userName==null || userName.length()==0) {
+			errors.put("userName", "userName is required");
+		}
+		
+		if(password==null || password.length()==0 ) {
+			errors.put("password", "password is required");
+		}
+		
+		if(birth==null || birth.length()==0) {
+			errors.put("birth", "birth is required");
+		}
+		
+		if(phone==null || phone.length()==0 ) {
+			errors.put("phone", "phone is required");
+		}
+		
+		if(email==null || email.length()==0) {
+			errors.put("email", "email is required");
+		}
+		
+		if(bank_code==0 ) {
+			errors.put("bank_code", "bank_code is required");
+		}
+		
+		if(account_no==0 ) {
+			errors.put("account_no", "account_no is required");
+		}
+		
+		if(errors!=null &&!errors.isEmpty()) {
+			return "testregister";
+		}
+		
+		for(MallMembers mlist:mallMembersList) {			
+			if(mlist.getUsername().equals(userName)) {
+				errors.put("userName2", "userName is used");
+				return "testregister";
+			}
+			if(mlist.getPhone().equals(phone)) {
+				errors.put("phone2", "phone is used");
+				return "testregister";
+			}
+			if(mlist.getEmail().equals(email)) {
+				errors.put("email2", "email is used");
+				return "testregister";
+			}
+		}
+		
+		BankAccount result = mService.checkLogin2(new BankAccount(bank_code,account_no ));
+		
+		if(result==null) {
+			errors.put("msg", "bank_code or account_no is not correct");
+			return "testregister";
+		}else {
+			for(MallMembers mlist2:mallMembersList) {
+				if(result.getId()==mService.checkLogin3(mlist2)) {
+					errors.put("msg", "account_no is used");
+					return "testregister";
+				}
+			}
+			MallMembers newMallMembers = new MallMembers(userName,password,dateFormat.parse(birth),phone,email,result);
+		    mService.insert(newMallMembers);
+		    
+		   MallMembers loginMallMember = mService.getBean(newMallMembers);
+		    m.addAttribute("sessionBean",loginMallMember);
+		    m.addAttribute("user",userName);
+		    return "testloginSuccess";
+		}
+	}
+	
+	@PostMapping(path="/testchecklogin.controller")
+	public String processAction4(@RequestParam("userName")String user , @RequestParam("userPwd")String pwd , Model m) {
+		Map<String, String> errors = new HashMap<String, String>();
+		m.addAttribute("errors", errors);
+		
+		if(user==null || user.length()==0) {
+			errors.put("name", "name is required");
+		}
+		
+		if(pwd==null || pwd.length()==0) {
+			errors.put("pwd", "user passowrd is required");
+		}
+		
+		if(errors!=null &&!errors.isEmpty()) {
+			return "testloginSystem";
+		}
+		
+		MallMembers checkMallMembers = new MallMembers(user, pwd);
+		
+		boolean result = mService.checkLogin(checkMallMembers);
+		
+		if(result) {
+			MallMembers loginMallMember = mService.getBean(checkMallMembers);
+			m.addAttribute("sessionBean",loginMallMember);
+			m.addAttribute("user",user);
+			return "testloginSuccess";
+		}
+		errors.put("msg", "username or password is not correct");
+		return "testloginSystem";
+	}
+	
+	@GetMapping(path="/testselectAll")
+	public String processAction5(@ModelAttribute(name = "delete")String deleteRs,Model m) {
+		List<MallMembers> list = mService.selectAllMallMembers();
+		m.addAttribute("list",list);
+		m.addAttribute("delete",deleteRs);
+		return "testshowAllMembers";
+	}
+	
+	@PostMapping(path="/testupdate")
+	public String processAction5(@RequestParam("memberId")Integer id , Model m) {
+		MallMembers mallMember = mService.selectOne(id);
+		m.addAttribute("mallMember",mallMember);
+		return "testshowOneMember";
+	}
+	
+	@PostMapping(path="/testupdate2")
+	public String processAction6(@ModelAttribute(name = "mallMember") MallMembers mem , Model m) {
+		List<MallMembers> mallMembersList = mService.selectAllMallMembers();
+		Map<String, String> errors = new HashMap<String, String>();
+		m.addAttribute("errors", errors);
+		for(MallMembers mlist:mallMembersList) {	
+			if(mlist.getId()==mem.getId()) {
+				continue;
+			}
+			if(mlist.getUsername().equals(mem.getUsername())) {
+				errors.put("msg", "userName is used");
+				return "testshowOneMember";
+			}
+			if(mlist.getPhone().equals(mem.getPhone())) {
+				errors.put("msg", "phone is used");
+				return "testshowOneMember";
+			}
+			if(mlist.getEmail().equals(mem.getEmail())) {
+				errors.put("msg", "email is used");
+				return "testshowOneMember";
+			}
+		}
+		MallMembers updateMem = mService.update(mem);
+		m.addAttribute("mallMember",updateMem);
+		errors.put("msg", "Successful!!");
+		return "testshowOneMember";
+	}
+	
+	@PostMapping(path="/testdelete")
+	public String processAction7(@RequestParam("memberId")Integer id , Model m) {
+		boolean deleteResult = mService.delete(id);
+		if(deleteResult) {
+			m.addAttribute("delete","delete successful");
+			return "redirect:/testselectAll";
+		}
+		m.addAttribute("delete","delete unsuccessfully");
+		return "redirect:/testselectAll";
+	}
+	
+	@GetMapping(path="/testlogout")
+	public String processAction8(SessionStatus status) {
+		status.setComplete();
+		return "redirect:/testchecklogin.controller";
+	}
+	
+	@GetMapping(path="/testselectLike")
+	public String processAction9(@RequestParam("search")String search,Model m) {
+		List<MallMembers> list = mService.like(search);
+		if(list==null) {
+			m.addAttribute("errorlike","查無此資料");
+		    return "testloginSuccess";
+		}
+		m.addAttribute("list",list);
+		return "testshowLike";
+	}
+}

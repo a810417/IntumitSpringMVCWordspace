@@ -1,0 +1,44 @@
+package tw.Intumit.controller;
+
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import tw.Intumit.model.Message;
+import tw.Intumit.service.MessageService;
+
+@Controller
+public class MessageController {
+
+	@Autowired
+	private MessageService mService;
+
+	@ResponseBody
+	@GetMapping(path = "/message.findOne/{id}")
+	public Message findOne(@PathVariable Integer id) {
+		return mService.findOne(id);
+	}
+
+	@ResponseBody
+	@GetMapping(path = "/message.findAll")
+	public List<Message> findAll() {
+		return mService.findAll();
+	}
+
+	@GetMapping(path="/message.create")
+	public Message insertMessage(String account, String title, Date deadLine, String content) {
+		Message message = new Message();
+		message.setAccount(account);
+		message.setTitle(title);
+		message.setDeadLine(deadLine);
+		message.setPostDate(new Date());
+		message.setContent(content);
+		return mService.insert(message);
+	}
+
+}

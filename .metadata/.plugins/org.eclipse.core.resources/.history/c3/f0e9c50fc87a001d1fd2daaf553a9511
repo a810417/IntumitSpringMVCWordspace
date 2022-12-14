@@ -1,0 +1,5 @@
+package tw.Intumit.dao;
+
+public class MessageDao {
+
+}

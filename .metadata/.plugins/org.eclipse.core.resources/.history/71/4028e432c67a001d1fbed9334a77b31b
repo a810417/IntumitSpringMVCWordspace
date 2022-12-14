@@ -1,0 +1,38 @@
+package tw.Intumit.model;
+
+
+import javax.transaction.Transactional;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository
+@Transactional
+public class AccountDao {
+	
+	@Autowired
+	private SessionFactory sessionFactory;
+	
+	public boolean checkLogin(Account account) {
+		Session session = sessionFactory.openSession();//因為beans.config的hibernate.current_session_context_class被註解掉所以要用openSession
+		
+		String hqlstr = "from Account where username=:user and userpwd=:pwd";
+		Query<Account> query = session.createQuery(hqlstr,Account.class);
+		query.setParameter("user", account.getUsername());
+		query.setParameter("pwd", account.getUserpwd());
+		
+		Account myAccount = query.uniqueResult();//當查到多筆時會丟出NonUniqueResultException
+		//Account myAccount = query.getSingleResult();//當查到多筆時會顯示第一個
+		
+		session.close();//openSession要關閉
+		
+		if(myAccount != null) {
+			return true;
+		}
+		
+		return false;
+	}
+}

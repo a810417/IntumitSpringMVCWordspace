@@ -1,0 +1,5 @@
+package tw.Intumit.service;
+
+public class MessageService {
+
+}

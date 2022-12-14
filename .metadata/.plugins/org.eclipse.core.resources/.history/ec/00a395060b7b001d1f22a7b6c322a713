@@ -1,0 +1,59 @@
+package tw.Intumit.controller;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import tw.Intumit.model.Message;
+import tw.Intumit.service.MessageService;
+
+@Controller
+public class MessageController {
+
+	@Autowired
+	private MessageService mService;
+
+	@ResponseBody
+	@GetMapping(path = "/message.findOne/{id}")
+	public Message findOne(@PathVariable Integer id) {
+		return mService.findOne(id);
+	}
+
+
+	@GetMapping(path = "/message.boardPage")
+	public String findAll(Model m) {
+		List<Message> allMessage = mService.findAll();
+		m.addAttribute("allMessage", allMessage);
+		return ""messageBoard;
+	}
+
+	@GetMapping(path = "/message.create")
+	public String insertMessage(@RequestParam("account") String account, @RequestParam("title") String title,
+			@RequestParam("postDate") String postDate, @RequestParam("deadLine") String deadLine,
+			@RequestParam("content") String content) throws ParseException {
+		
+		System.out.println(postDate);
+		System.out.println(deadLine);
+		Date datePostDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(postDate+" 00:00:00.000");
+		Date dateDeadLine = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(deadLine+" 00:00:00.000");
+		Message message = new Message();
+	
+		message.setAccount(account);
+		message.setTitle(title);
+		message.setDeadLine(datePostDate);
+		message.setPostDate(dateDeadLine);
+		message.setContent(content);
+		mService.insert(message);
+		return "redirect:/message.board";
+	}
+
+}

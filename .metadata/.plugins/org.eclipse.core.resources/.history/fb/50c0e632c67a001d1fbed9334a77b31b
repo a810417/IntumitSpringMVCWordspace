@@ -1,0 +1,61 @@
+package tw.Intumit.model;
+
+import java.util.List;
+
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Transactional
+@Service
+public class MallmembersService {
+	
+	@Autowired
+	private MallmembersDao mallmembersDao;
+	
+	 public boolean checkLogin(MallMembers mallMembers) {
+		 return mallmembersDao.checkLogin(mallMembers);
+	 }
+	 
+	 public BankAccount checkLogin2(BankAccount bankAccount) {
+		 return mallmembersDao.checkLogin2(bankAccount);
+	 }
+	 
+	 public int checkLogin3(MallMembers mallMembers) {
+		 return mallmembersDao.checkLogin3(mallMembers);
+	 }
+	 
+	 public MallMembers getBean(MallMembers mallMembers) {
+		 return mallmembersDao.getBean(mallMembers);
+	 }
+	 
+	 public MallMembers insert(MallMembers mallMembers) {
+		return  mallmembersDao.insert(mallMembers);
+	 }
+	 
+	 public MallMembers selectOne(int id) {
+		 return mallmembersDao.selectOne(id);
+	 }
+	 
+	 public MallMembers update(MallMembers mallMembers) {
+		 return mallmembersDao.update(mallMembers);
+	 }
+	 
+	 public boolean delete(int id) {
+		 return mallmembersDao.delete(id);
+	 }
+	 
+	 public List<BankAccount> selectAllBankAccount(){
+		 return mallmembersDao.selectAllBankAccount();
+	 }
+	 
+	 public List<MallMembers> selectAllMallMembers(){
+		 return mallmembersDao.selectAllMallMembers();
+	 }
+	 
+	 public List<MallMembers> like(String search){
+		 return mallmembersDao.like(search);
+	 }
+}

@@ -1,0 +1,39 @@
+package com.ispan.springbootdemo.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.ispan.springbootdemo.model.Message;
+import com.ispan.springbootdemo.serviceImpl.MessageServiceImpl;
+
+@Controller
+public class MessageController {
+
+	@Autowired
+	private MessageServiceImpl MessageSI;
+
+	@ResponseBody
+	@GetMapping(path = "/message.findOne/{id}")
+	public Message findOne(@PathVariable Integer id) {
+		return MessageSI.findOne(id);
+	}
+
+	@ResponseBody
+	@GetMapping(path = "/message.findAllPage")
+	public Page<Message> findAllPage() {
+		return MessageSI.findAllInPage();
+	}
+
+	@ResponseBody
+	@GetMapping(path = "/message.findAll")
+	public List<Message> findAll() {
+		return MessageSI.findAll();
+	}
+
+}

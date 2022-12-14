@@ -1,0 +1,38 @@
+package tw.Intumit.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import tw.Intumit.model.Members;
+
+@Controller
+public class MembersController {
+
+	@GetMapping(path = "/membersmain.controller")
+	public String processMainAction(Model m) {
+		//Members mem1 = new Members();
+		Members mem1 = new Members("Please input name","Please input gender",0);
+		m.addAttribute("members", mem1);//addAttribute左邊值跟modelAttribute值一樣
+		return "members";
+	}
+	
+	@PostMapping(path = "/addMembers")
+	public String processAction(@ModelAttribute(name = "members") Members mem2 , BindingResult result , Model m) {
+		//@ModelAttribute值跟modelAttribute值一樣
+		if(result.hasErrors()) {
+			return "membersError";
+		}
+		if(mem2.getMemberName().equals("") || mem2.getGender().equals("")) {
+			return "membersError";
+		}
+		m.addAttribute("mName",mem2.getMemberName());
+		m.addAttribute("mGender",mem2.getGender());
+		m.addAttribute("mAge",mem2.getAge());
+		
+		return "membersResult";
+	}
+}
